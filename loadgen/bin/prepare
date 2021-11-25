@@ -1,0 +1,6 @@
+#!/bin/bash
+
+mysql_host=$1
+
+mysql -u admin -phunter2 -h $mysql_host -e "create database if not exists sbtest"
+sysbench --db-driver=mysql --mysql-user=admin --mysql-password=hunter2 --mysql-host=$mysql_host --tables=16 --table-size=50000 /usr/share/sysbench/oltp_read_write.lua prepare

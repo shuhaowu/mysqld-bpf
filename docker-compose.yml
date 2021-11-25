@@ -1,0 +1,32 @@
+version: "3.8"
+services:
+  mysql57:
+    build:
+      context: ./mysql
+      args:
+        PERCONA_VERSION: 5.7.35-38
+    volumes:
+      - /data/mysql
+      - /sys/kernel/debug:/sys/kernel/debug
+      - ./mysql/trace:/opt/trace
+    privileged: true
+    tmpfs:
+      - /var/run/mysqld
+  mysql80:
+    build:
+      context: ./mysql
+      args:
+        PERCONA_VERSION: 8.0.26-16
+    volumes:
+      - /data/mysql
+      - /sys/kernel/debug:/sys/kernel/debug
+      - ./mysql/trace:/opt/trace
+    privileged: true
+    tmpfs:
+      - /var/run/mysqld
+  loadgen:
+    build:
+      context: ./loadgen
+    volumes:
+      - ./loadgen:/app
+

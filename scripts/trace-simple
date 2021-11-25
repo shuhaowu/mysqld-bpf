@@ -1,0 +1,6 @@
+#!/bin/bash
+
+host=$1
+shift
+
+docker-compose exec $host /opt/trace/mysql_query_tracer.py "$@"

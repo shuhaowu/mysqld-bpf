@@ -1,0 +1,5 @@
+#!/bin/bash
+
+set -e
+
+sysbench --db-driver=mysql --mysql-user=admin --mysql-password=hunter2 --mysql-db=sbtest --mysql-host=$1 --tables=16 --table-size=50000 --threads=4 --time=0 --events=0 --report-interval=1 /usr/share/sysbench/oltp_read_write.lua run
