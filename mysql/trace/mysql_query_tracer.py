@@ -20,6 +20,7 @@ class MysqlQueryTracer(object):
 
     char query[256];
     u64 query_length;
+    u8 query_truncated;
 
     // Needed for USDT, as the query is read in the done probe
     // Also if I allocate a local variable directly for this addr, and then
@@ -54,7 +55,13 @@ class MysqlQueryTracer(object):
     data->time_taken = bpf_ktime_get_ns() - data->timestamp;
     if (data->time_taken >= THRESHOLD) {
       // Reading it here is more performant if THRESHOLD is non-zero.
-      bpf_probe_read_user_str(&data->query, sizeof(data->query), (void*) data->query_addr);
+      data->query_length = bpf_probe_read_user_str(&data->query, sizeof(data->query), (void*) data->query_addr);
+      data->query_truncated = 0;
+      // Compared to the uprobe method, I think this is technically off by 1, but it is close enough...
+      if (data->query_length == sizeof(data->query) && data->query[data->query_length-1] != '\\0') {
+        data->query_truncated = 1;
+      }
+
       events.perf_submit(ctx, data, sizeof(*data));
     }
 
@@ -84,6 +91,8 @@ class MysqlQueryTracer(object):
 
     // Read the address of the pointer to const char of the query itself
     bpf_probe_read_user(&query_addr, sizeof(query_addr), thd_addr + M_QUERY_STRING_OFFSET);
+
+    data.query_truncated = data.query_length > sizeof(data.query_length);
 
     // Read the actual query string.
     bpf_probe_read_user_str(&data.query, sizeof(data.query), query_addr);
@@ -156,10 +165,11 @@ class MysqlQueryTracer(object):
 
   def on_event(self, event, **kwargs):
     """Override this function in a subclass to get custom aggregation behaviour"""
-    print("{}\t{:.1f}\t{}\t{}".format(
+    print("{}\t{:.1f}\t{} ({})\t{}".format(
       datetime.fromtimestamp(event.timestamp / 1000000000),
       event.time_taken / 100000,
       event.query_length,
+      event.query_truncated,
       event.query
     ))
 
