@@ -92,7 +92,7 @@ class MysqlQueryTracer(object):
     // Read the address of the pointer to const char of the query itself
     bpf_probe_read_user(&query_addr, sizeof(query_addr), thd_addr + M_QUERY_STRING_OFFSET);
 
-    data.query_truncated = data.query_length > sizeof(data.query_length);
+    data.query_truncated = data.query_length > sizeof(data.query);
 
     // Read the actual query string.
     bpf_probe_read_user_str(&data.query, sizeof(data.query), query_addr);
@@ -166,7 +166,7 @@ class MysqlQueryTracer(object):
   def on_event(self, event, **kwargs):
     """Override this function in a subclass to get custom aggregation behaviour"""
     print("{}\t{:.1f}\t{} ({})\t{}".format(
-      datetime.fromtimestamp(event.timestamp / 1000000000),
+      event.timestamp / 1000000000,
       event.time_taken / 100000,
       event.query_length,
       event.query_truncated,

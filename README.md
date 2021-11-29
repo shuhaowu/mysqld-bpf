@@ -17,6 +17,22 @@ There are four trace functions: `do_trace_start_usdt`, `do_trace_done_usdt`,
 DTrace/USDT
 -----------
 
+Example output (columns are: timestamp, time taken in ms, query length (truncated), query):
+
+```
+$ scripts/trace-simple mysql57 -m usdt
+26528791.634560782      0.5     6 (0)   b'BEGIN'
+26528791.634793196      1.1     34 (0)  b'SELECT c FROM sbtest12 WHERE id=?'
+26528791.635121044      1.1     34 (0)  b'SELECT c FROM sbtest12 WHERE id=?'
+26528791.635502957      0.9     34 (0)  b'SELECT c FROM sbtest12 WHERE id=?'
+26528791.635441314      0.5     6 (0)   b'BEGIN'
+26528791.635673296      1.0     33 (0)  b'SELECT c FROM sbtest8 WHERE id=?'
+26528791.636214893      1.3     34 (0)  b'SELECT c FROM sbtest12 WHERE id=?'
+26528791.636536162      1.1     34 (0)  b'SELECT c FROM sbtest12 WHERE id=?'
+26528791.636299416      2.9     33 (0)  b'SELECT c FROM sbtest8 WHERE id=?'
+26528791.636855353      2.3     33 (0)  b'SELECT c FROM sbtest8 WHERE id=?'
+```
+
 MySQL in 5.7 has built-in support for DTrace tracepoints. The tracepoints are
 organized through the entire query process as follows:
 
@@ -35,6 +51,22 @@ References:
 
 UProbe
 ------
+
+Example output (columns are: timestamp, time taken in ms, query length (truncated), query):
+
+```
+$ scripts/trace-simple mysql57 -m uprobe
+26528778.247213945      5.8     58 (0)  b'SELECT c FROM sbtest13 WHERE id BETWEEN ? AND ? ORDER BY c'
+26528778.247934274      2.0     56 (0)  b'INSERT INTO sbtest16 (id, k, c, pad) VALUES (?, ?, ?, ?)'
+26528778.248027775      13.3    67 (0)  b'SELECT DISTINCT c FROM sbtest15 WHERE id BETWEEN ? AND ? ORDER BY c'
+26528778.249757726      2.2     35 (0)  b'UPDATE sbtest4 SET k=k+1 WHERE id=?'
+26528778.250416216      1.1     33 (0)  b'UPDATE sbtest7 SET c=? WHERE id=?'
+26528778.250926454      1.4     30 (0)  b'DELETE FROM sbtest7 WHERE id=?'
+26528778.251274034      0.8     55 (0)  b'INSERT INTO sbtest7 (id, k, c, pad) VALUES (?, ?, ?, ?)'
+26528778.244629823      123.4   6 (0)   b'COMMIT'
+26528778.257279973      0.1     5 (0)   b'BEGIN'
+26528778.25748157       0.7     33 (0)  b'SELECT c FROM sbtest15 WHERE id=?'
+```
 
 MySQL deprecated Dtrace in 5.7 and removed it in 8.0. This means that it can
 no longer be traced via USDT. The present repo contains a BPF program that can
