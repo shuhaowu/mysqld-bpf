@@ -5,7 +5,10 @@ MySQL 5.7 has [DTrace][1] support, which can be [used as USDT tracepoints][2].
 Unfortunately, DTrace support was removed in 8.0, because presumably no one
 used it, as DTrace is only recently supported on Linux. This repo has a BPF
 program that can trace both via the DTrace tracepoints, as well as via
-[uprobe][3].
+[uprobe][3]. The tracer script is written at
+[`./mysql/trace/mysql_query_tracer.py`](./mysql/trace/mysql_query_tracer.py).
+There are four trace functions: `do_trace_start_usdt`, `do_trace_done_usdt`,
+`do_trace_start_uprobe`, `do_trace_done_uprobe`.
 
 [1]: https://dev.mysql.com/doc/refman/5.7/en/dba-dtrace-server.html
 [2]: https://leezhenghui.github.io/linux/2019/03/05/exploring-usdt-on-linux.html#heading-how-does-dtrace-works-with-usdt
